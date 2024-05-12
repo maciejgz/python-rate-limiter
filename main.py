@@ -1,8 +1,4 @@
-from fastapi import FastAPI
+from src.api import app
 
-app = FastAPI()
-
-
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
+import src.rate_limiter as rate_limiter
+import src.api as api
