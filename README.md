@@ -23,3 +23,26 @@ The sliding window algorithm is a rate limiting algorithm that is used to contro
 
 The rate limiter can be configured by setting the following environment variables:
 - `RATE_LIMITER_ALGORITHM` - the rate limiting algorithm to use (token_bucket, leaky_bucket, sliding_window)
+
+
+## Usage
+
+To run rate-limiter localy, run the following command:
+
+```bash
+uvicorn.bat main:app --reload
+```
+
+### Docker
+
+#### Build the image
+
+```bash
+docker build -t rate-limiter:latest .
+```
+
+#### Run the container
+
+```bash
+docker run -p 8000:8000 rate-limiter:latest
+```

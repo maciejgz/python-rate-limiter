@@ -1,3 +1,4 @@
 flask
 uvicorn
 python-dotenv
+fastapi
