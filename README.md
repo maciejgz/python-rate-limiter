@@ -16,7 +16,7 @@ The token bucket algorithm is a rate limiting algorithm that is used to control 
 - redis_token_bucket - [source code](/src/redis_token_bucket.py) - distributed token bucket. Each user can make one request per 15 seconds. Rate limit is set to 100 requests per 15 seconds. Redis is used to store the state of the token bucket. Only one instance of the rate limiter instance is responsible for refilling the tokens. The other instances of the rate limiter instance are responsible for consuming the tokens. The token bucket algorithm is a simple and efficient way to control the rate of traffic sent or received by a network.
 
 #### Leaky bucket algorithm
-The leaky bucket algorithm is a rate limiting algorithm that is used to control the rate of traffic sent or received by a network. It is used to prevent abuse of the network and to ensure that the network is used in a fair way. The leaky bucket algorithm works by maintaining a bucket of tokens. Each token represents a unit of traffic that can be sent or received by the network. When a packet of traffic is sent or received by the network, a token is removed from the bucket. If the bucket is empty, the packet is dropped or delayed until a token becomes available. The leaky bucket algorithm is a simple and efficient way to control the rate of traffic sent or received by a network.
+The leaky bucket algorithm is a rate limiting algorithm that is used to control the rate of traffic sent or received by a network. It is used to prevent abuse of the network and to ensure that the network is used in a fair way. The leaky bucket algorithm works by maintaining a bucket of tokens. Each token represents a unit of traffic that can be sent or received by the network. When a packet of traffic is sent or received by the network, a token is removed from the bucket. If the bucket is empty, the request is queued and throttled to one per second. The leaky bucket algorithm is a simple and efficient way to control the rate of traffic sent or received by a network.
 
 #### Sliding window algorithm
 The sliding window algorithm is a rate limiting algorithm that is used to control the rate of traffic sent or received by a network. It is used to prevent abuse of the network and to ensure that the network is used in a fair way. The sliding window algorithm works by maintaining a window of tokens. Each token represents a unit of traffic that can be sent or received by the network. When a packet of traffic is sent or received by the network, a token is removed from the window. If the window is empty, the packet is dropped or delayed until a token becomes available. The sliding window algorithm is a simple and efficient way to control the rate of traffic sent or received by a network.
@@ -47,6 +47,12 @@ uvicorn.exe main:app --reload
 ```
 
 ### Docker
+
+#### Run Redis
+
+```bash
+docker-compose -f docker/redis.yml up -d 
+```
 
 #### Build the image
 

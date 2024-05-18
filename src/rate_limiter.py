@@ -1,4 +1,5 @@
 from src.in_memory_token_bucket import InMemoryTokenBucket
+from src.redis_token_bucket import RedisTokenBucket
 from datetime import datetime, timedelta
 
 
@@ -10,10 +11,19 @@ class RateLimiter:
         
     token_bucket = {}
     
+    def create_unique_key(self, request):
+        # Create a unique key for the user agent
+        # in real-world scenarios, this should be more sophisticated e.g. using a hash function of the JWT token, IP and user agent
+        user_agent = request.headers.get("user-agent", "")
+        ip = request.client.host
+        return f"{ip}_{user_agent}"
+    
 
     def rate_limiter(self, request):
         if self.algorithm == "fixed_window":
             return self.fixed_window_rate_limiter(request)
+        elif self.algorithm == "redis_token_bucket":
+            return self.redis_token_bucket_rate_limiter(request)
         elif self.algorithm == "sliding_window":
             return self.sliding_window_rate_limiter(request)
         elif self.algorithm == "in_memory_token_bucket":
@@ -26,20 +36,13 @@ class RateLimiter:
         print("Sliding window rate limiter logic")
 
     def token_bucket_rate_limiter(self, request):
-        print("In memory token bucket rate limiter logic")
-
-        # Get the current time
-        current_time = datetime.now()
-
-        user_agent = request.headers.get("user-agent", "")
-
-        # Create a unique key for the user agent
-        # in real-world scenarios, this should be more sophisticated e.g. using a hash function of the JWT token, IP and user agent
-        ip = request.client.host   
-        unique_user_key = f"{ip}_{user_agent}"
+        print("In memory token bucket rate limiter logic")        
+        return global_in_memory_bucket.consume(self.create_unique_key(request), 1);
         
-        return global_in_memory_bucket.consume(unique_user_key, 1);
-        
+    def redis_token_bucket_rate_limiter(self, request):
+        print("Redis token bucket rate limiter logic")
+        redis_token_bucket = RedisTokenBucket(15, 15, True)
+        return redis_token_bucket.consume(self.create_unique_key(request), 1);
         
     
     
