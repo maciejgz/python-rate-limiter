@@ -1,4 +1,4 @@
 from src.api import app
 
-import src.rate_limiter as rate_limiter
+import src.rate_limiter_api as rate_limiter_api
 import src.api as api
