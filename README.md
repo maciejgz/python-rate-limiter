@@ -43,8 +43,12 @@ pip install -r requirements.txt
 To run rate-limiter localy, run the following command:
 
 ```bash
-uvicorn.exe main:app --reload
+$env:MASTER_NODE="true"; .\uvicorn.bat main:app --reload --port 8000
 ```
+
+Params:
+- `MASTER_NODE` - if set to `True` the instance will be responsible for refilling the tokens. Default is `False`
+- `--port` - port on which the API will be available. Default is `8000`
 
 ### Docker
 
@@ -52,6 +56,11 @@ uvicorn.exe main:app --reload
 
 ```bash
 docker-compose -f docker/redis.yml up -d 
+```
+
+Then you can connect to Redis using the following command:
+```
+ docker exec -it python-rate-limiter-redis redis-cli
 ```
 
 #### Build the image

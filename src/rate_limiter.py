@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 
 
 global_in_memory_bucket = InMemoryTokenBucket(15, 15);
+redis_token_bucket = RedisTokenBucket(15, 15)
 
 class RateLimiter:
     def __init__(self, algorithm):
@@ -41,7 +42,6 @@ class RateLimiter:
         
     def redis_token_bucket_rate_limiter(self, request):
         print("Redis token bucket rate limiter logic")
-        redis_token_bucket = RedisTokenBucket(15, 15, True)
         return redis_token_bucket.consume(self.create_unique_key(request), 1);
         
     

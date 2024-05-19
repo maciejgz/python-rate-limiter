@@ -19,14 +19,12 @@ async def add_process_time_header(request, call_next):
 
     unique_user_key = f"{ip}_{user_agent}"
 
-    # print(f"Unique user key: {unique_user_key}")
     rate_limitng_result = rate_limiter.rate_limiter(request)
     
     if rate_limitng_result == False:
         print("Rate limit exceeded. Try again later.")
         return JSONResponse(status_code=429, content={"message": "Rate limit exceeded. Try again later."})
     else:
-        print("Rate limit not exceeded. Continue processing the request.")
         response = await call_next(request)
         
     return response
