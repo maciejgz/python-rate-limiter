@@ -25,7 +25,6 @@ class RedisTokenBucket:
         if master_node:
             print("Master node. Setting the token bucket size to " + str(self.size))
             self.fill_bucket_thread()
-            self.redis.set(REDIS_TOKEN_BUCKET_KEY, self.size)
             
             
     def store_rate_limit_info(self, user_id):

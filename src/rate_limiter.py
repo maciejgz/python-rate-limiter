@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 
 
 global_in_memory_bucket = InMemoryTokenBucket(15, 15);
-redis_token_bucket = RedisTokenBucket(15, 15)
+redis_token_bucket = RedisTokenBucket(5, 5)
 
 class RateLimiter:
     def __init__(self, algorithm):
