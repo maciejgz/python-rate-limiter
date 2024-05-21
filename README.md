@@ -43,7 +43,7 @@ pip install -r requirements.txt
 To run rate-limiter localy, run the following command:
 
 ```bash
-fastapi.bat dev main.py --port 8000
+$env:MASTER_NODE="True"; fastapi.bat run main.py --port 8000
 ```
 
 Params:
