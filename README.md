@@ -43,11 +43,12 @@ pip install -r requirements.txt
 To run rate-limiter localy, run the following command:
 
 ```bash
-$env:MASTER_NODE="True"; fastapi.bat run main.py --port 8000
+$env:RATE_LIMITER_ALGORITHM="redis_token_bucket"; $env:MASTER_NODE="True"; fastapi run main.py --port 8000
 ```
 
 Params:
 - `MASTER_NODE` - if set to `True` the instance will be responsible for refilling the tokens. Default is `False`
+- `RATE_LIMITER_ALGORITHM` - the rate limiting algorithm to use. Default is `in_memory_token_bucket`
 - `--port` - port on which the API will be available. Default is `8000`
 
 ### Docker

@@ -8,6 +8,7 @@ redis_token_bucket = RedisTokenBucket(5, 5)
 
 class RateLimiter:
     def __init__(self, algorithm):
+        print("Rate limiter algorithm: " + algorithm)
         self.algorithm = algorithm
         
     token_bucket = {}

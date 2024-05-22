@@ -10,10 +10,10 @@ from src.const import RATE_LIMITER_ALGORITHM_ENV, MASTER_NODE_ENV, REDIS_DB_ENV,
 
 load_dotenv()
 rate_limiter_algorithm = os.getenv(RATE_LIMITER_ALGORITHM_ENV)
-master_node = os.getenv(MASTER_NODE_ENV, False).lower == "true"
-redis_host = os.getenv(REDIS_HOST_ENV)
-redis_port = os.getenv(REDIS_PORT_ENV)
-redis_db = os.getenv(REDIS_DB_ENV)
+master_node = os.getenv(MASTER_NODE_ENV, False).lower() == "true"
+redis_host = os.getenv(REDIS_HOST_ENV, "localhost")
+redis_port = os.getenv(REDIS_PORT_ENV, 6379)
+redis_db = os.getenv(REDIS_DB_ENV, 0)
 REDIS_TOKEN_BUCKET_KEY = "token_bucket"
 REDIS_USER_ENTRIES_PREFIX = "user:"
 
@@ -44,12 +44,14 @@ class RedisTokenBucket:
         
     ## refilling the bucket    
     def fill_bucket_thread(self):
-        threading.Thread(target=self.add_tokens, args=(self.refresh_rate,)).start()
+        threading.Thread(target=self.add_tokens, args=()).start()
     
-    def add_tokens(self, tokens):
+    def add_tokens(self):
         while True:
-            print("Adding tokens to the bucket " + str(tokens))
-            self.redis.set(REDIS_TOKEN_BUCKET_KEY, min(self.size, int(self.redis.get(REDIS_TOKEN_BUCKET_KEY)) + tokens))
+            print("Adding tokens to the bucket " + str(self.size))
+            if(self.redis.get(REDIS_TOKEN_BUCKET_KEY)) is None:
+                self.redis.set(REDIS_TOKEN_BUCKET_KEY, self.size)
+            self.redis.set(REDIS_TOKEN_BUCKET_KEY, min(self.size, int(self.redis.get(REDIS_TOKEN_BUCKET_KEY)) + self.size))
             print("Tokens added. Tokens left: " + str(self.redis.get(REDIS_TOKEN_BUCKET_KEY)))
             time.sleep(self.refresh_rate)
         
