@@ -58,6 +58,7 @@ Params:
 ```bash
 docker-compose -f docker/redis.yml up -d 
 ```
+This command will start a Redis container and create a network called `docker_python-rate-limiter-network` which will be used by the rate limiter container to connect to Redis.
 
 Then you can connect to Redis using the following command:
 ```bash
@@ -67,11 +68,13 @@ Then you can connect to Redis using the following command:
 #### Build the image
 
 ```bash
-docker build -t rate-limiter:latest .
+docker build -t python-rate-limiter:latest .
 ```
 
 #### Run the container
 
 ```bash
-docker run --network python-rate-limiter-network -p 8000:8000 -e "REDIS_HOST=python-rate-limiter-redis" -e "MASTER_NODE=True" -e "RATE_LIMITER_ALGORITHM=redis_token_bucket" python-rate-limiter:latest
+docker run --network docker_python-rate-limiter-network -p 8000:8000 -e "REDIS_HOST=python-rate-limiter-redis" -e "MASTER_NODE=True" -e "RATE_LIMITER_ALGORITHM=redis_token_bucket" python-rate-limiter:latest
 ```
+
+### Kubernetes
