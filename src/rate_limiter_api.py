@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse
 
 
 load_dotenv()
-rate_limiter_algorithm = os.getenv("RATE_LIMITER_ALGORITHM")
+rate_limiter_algorithm = os.getenv("RATE_LIMITER_ALGORITHM", "bucket_token")
 
 rate_limiter = RateLimiter(rate_limiter_algorithm)
 

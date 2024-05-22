@@ -73,5 +73,5 @@ docker build -t rate-limiter:latest .
 #### Run the container
 
 ```bash
-docker run -p 8000:8000 rate-limiter:latest
+docker run --network python-rate-limiter-network -p 8000:8000 -e "REDIS_HOST=python-rate-limiter-redis" -e "MASTER_NODE=True" -e "RATE_LIMITER_ALGORITHM=redis_token_bucket" python-rate-limiter:latest
 ```

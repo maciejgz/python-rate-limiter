@@ -10,7 +10,7 @@ from src.const import RATE_LIMITER_ALGORITHM_ENV, MASTER_NODE_ENV, REDIS_DB_ENV,
 
 load_dotenv()
 rate_limiter_algorithm = os.getenv(RATE_LIMITER_ALGORITHM_ENV)
-master_node = os.getenv(MASTER_NODE_ENV, False).lower() == "true"
+master_node = os.getenv(MASTER_NODE_ENV, "False").lower() == "true"
 redis_host = os.getenv(REDIS_HOST_ENV, "localhost")
 redis_port = os.getenv(REDIS_PORT_ENV, 6379)
 redis_db = os.getenv(REDIS_DB_ENV, 0)
@@ -26,6 +26,9 @@ class RedisTokenBucket:
         if master_node:
             print("Master node. Setting the token bucket size to " + str(self.size))
             self.fill_bucket_thread()
+        else:
+            print("Slave node. Not setting the token bucket size")    
+        
             
             
     def store_rate_limit_info(self, user_id):
@@ -35,7 +38,7 @@ class RedisTokenBucket:
         self.redis.set(REDIS_USER_ENTRIES_PREFIX + user_id, json.dumps(rate_limit_info))
         
     def get_rate_limit_info(self, user_id):
-        rate_limit_info = self.redis.get(user_id)
+        rate_limit_info = self.redis.get(REDIS_USER_ENTRIES_PREFIX + user_id)
         if rate_limit_info:
             return json.loads(rate_limit_info)
         else:
@@ -63,14 +66,17 @@ class RedisTokenBucket:
         if rate_limit_info is None:
             self.store_rate_limit_info(user_id)
         else:
+            print("User made a request in the last refresh_rate seconds: " + rate_limit_info['last_request_time'])
             if (current_time - datetime.fromisoformat(rate_limit_info['last_request_time'])).seconds < self.refresh_rate:
-                print("User made a request in the last refresh_rate seconds: " + rate_limit_info['last_request_time'])
+                print("User last request: " + rate_limit_info['last_request_time'])
                 return False
             else:
+                print("Last user request: " + rate_limit_info['last_request_time'] + " setting the last request time to " + current_time.isoformat())
                 self.store_rate_limit_info(user_id)
         
         if (int(self.redis.get(REDIS_TOKEN_BUCKET_KEY)) >= tokens):
             self.redis.set(REDIS_TOKEN_BUCKET_KEY, int(self.redis.get(REDIS_TOKEN_BUCKET_KEY)) - tokens)
+            self.store_rate_limit_info(user_id)
             print("Bucket updated. Tokens left: " + str(self.redis.get(REDIS_TOKEN_BUCKET_KEY)))
             return True
         
