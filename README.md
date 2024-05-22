@@ -78,3 +78,6 @@ docker run --network docker_python-rate-limiter-network -p 8000:8000 -e "REDIS_H
 ```
 
 ### Kubernetes
+```bash
+kubectl apply -f k8s/python-rate-limiter.yml
+```
