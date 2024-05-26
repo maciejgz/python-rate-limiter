@@ -16,7 +16,7 @@ The token bucket algorithm is a rate limiting algorithm that is used to control 
 - redis_token_bucket - [source code](/src/redis_token_bucket.py) - distributed token bucket. Each user can make one request per 15 seconds. Rate limit is set to 100 requests per 15 seconds. Redis is used to store the state of the token bucket. Only one instance of the rate limiter instance is responsible for refilling the tokens. The other instances of the rate limiter instance are responsible for consuming the tokens. The token bucket algorithm is a simple and efficient way to control the rate of traffic sent or received by a network.
 
 #### Leaky bucket algorithm
-The leaky bucket algorithm is a rate limiting algorithm that is used to control the rate of traffic sent or received by a network. It is used to prevent abuse of the network and to ensure that the network is used in a fair way. The leaky bucket algorithm works by maintaining a bucket of tokens. Each token represents a unit of traffic that can be sent or received by the network. When a packet of traffic is sent or received by the network, a token is removed from the bucket. If the bucket is empty, the packet is dropped or delayed until a token becomes available. The leaky bucket algorithm is a simple and efficient way to control the rate of traffic sent or received by a network.
+The leaky bucket algorithm is a rate limiting algorithm that is used to control the rate of traffic sent or received by a network. It is used to prevent abuse of the network and to ensure that the network is used in a fair way. The leaky bucket algorithm works by maintaining a bucket of tokens. Each token represents a unit of traffic that can be sent or received by the network. When a packet of traffic is sent or received by the network, a token is removed from the bucket. If the bucket is empty, the request is queued and throttled to one per second. The leaky bucket algorithm is a simple and efficient way to control the rate of traffic sent or received by a network.
 
 #### Sliding window algorithm
 The sliding window algorithm is a rate limiting algorithm that is used to control the rate of traffic sent or received by a network. It is used to prevent abuse of the network and to ensure that the network is used in a fair way. The sliding window algorithm works by maintaining a window of tokens. Each token represents a unit of traffic that can be sent or received by the network. When a packet of traffic is sent or received by the network, a token is removed from the window. If the window is empty, the packet is dropped or delayed until a token becomes available. The sliding window algorithm is a simple and efficient way to control the rate of traffic sent or received by a network.
@@ -43,19 +43,42 @@ pip install -r requirements.txt
 To run rate-limiter localy, run the following command:
 
 ```bash
-uvicorn.exe main:app --reload
+$env:RATE_LIMITER_ALGORITHM="redis_token_bucket"; $env:MASTER_NODE="True"; fastapi run main.py --port 8000
 ```
 
+Params:
+- `MASTER_NODE` - if set to `True` the instance will be responsible for refilling the tokens. Default is `False`
+- `RATE_LIMITER_ALGORITHM` - the rate limiting algorithm to use. Default is `in_memory_token_bucket`
+- `--port` - port on which the API will be available. Default is `8000`
+
 ### Docker
+
+#### Run Redis
+
+```bash
+docker-compose -f docker/redis.yml up -d 
+```
+This command will start a Redis container and create a network called `docker_python-rate-limiter-network` which will be used by the rate limiter container to connect to Redis.
+
+Then you can connect to Redis using the following command:
+```bash
+ docker exec -it python-rate-limiter-redis redis-cli
+```
 
 #### Build the image
 
 ```bash
-docker build -t rate-limiter:latest .
+docker build -t python-rate-limiter:latest .
 ```
 
 #### Run the container
 
 ```bash
-docker run -p 8000:8000 rate-limiter:latest
+docker run --network docker_python-rate-limiter-network -p 8000:8000 -e "REDIS_HOST=python-rate-limiter-redis" -e "MASTER_NODE=True" -e "RATE_LIMITER_ALGORITHM=redis_token_bucket" python-rate-limiter:latest
 ```
+
+### Kubernetes
+```bash
+kubectl apply -f k8s/python-rate-limiter.yml
+```
+API will be available on port 80: http://localhost:80/

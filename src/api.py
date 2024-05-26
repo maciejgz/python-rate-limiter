@@ -5,4 +5,4 @@ app = FastAPI()
 
 @app.get("/")
 async def root():
-    return {"message": "Hello World " + datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+    return {"message": "RATE LIMITING API " + datetime.now().strftime("%Y-%m-%d %H:%M:%S")}

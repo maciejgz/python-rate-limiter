@@ -1,0 +1,150 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: python-rate-limiter-loadbalancer
+spec:
+  type: LoadBalancer
+  selector:
+    app: python-rate-limiter
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
+---
+### Redis
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-service
+spec:
+  selector:
+    app: redis
+  ports:
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - name: redis
+          image: redis
+          ports:
+            - containerPort: 6379
+          resources:
+            limits:
+              cpu: "1"
+              memory: "512Mi"
+            requests:
+              cpu: "0.5"
+              memory: "256Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: python-rate-limiter-service
+spec:
+  selector:
+    app: python-rate-limiter
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+
+## rate limiter slave
+--- 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: python-rate-limiter-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: python-rate-limiter
+  template:
+    metadata:
+      labels:
+        app: python-rate-limiter
+    spec:
+      containers:
+        - name: python-rate-limiter
+          image: python-rate-limiter:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: REDIS_HOST
+              value: redis-service
+            - name: MASTER_NODE
+              value: "False"
+            - name: RATE_LIMITER_ALGORITHM
+              value: "redis_token_bucket"
+          ports:
+            - containerPort: 8000
+          resources:
+            limits:
+              cpu: "1"
+              memory: "512Mi"
+            requests:
+              cpu: "0.5"
+              memory: "256Mi"
+
+## rate limiter master
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: python-rate-limiter-master-service
+spec:
+  selector:
+    app: python-rate-limiter-master
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: python-rate-limiter-master-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: python-rate-limiter
+  template:
+    metadata:
+      labels:
+        app: python-rate-limiter
+    spec:
+      containers:
+        - name: python-rate-limiter-master
+          image: python-rate-limiter:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: REDIS_HOST
+              value: redis-service
+            - name: MASTER_NODE
+              value: "True"
+            - name: RATE_LIMITER_ALGORITHM
+              value: "redis_token_bucket"
+          ports:
+            - containerPort: 8000
+          resources:
+            limits:
+              cpu: "1"
+              memory: "512Mi"
+            requests:
+              cpu: "0.5"
+              memory: "256Mi"

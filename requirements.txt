@@ -2,3 +2,4 @@ flask
 uvicorn
 python-dotenv
 fastapi
+redis
