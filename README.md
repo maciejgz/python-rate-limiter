@@ -81,3 +81,4 @@ docker run --network docker_python-rate-limiter-network -p 8000:8000 -e "REDIS_H
 ```bash
 kubectl apply -f k8s/python-rate-limiter.yml
 ```
+API will be available on port 80: http://localhost:80/
