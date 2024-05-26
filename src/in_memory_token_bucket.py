@@ -1,13 +1,22 @@
 from datetime import datetime
+import os
 import threading
+from dotenv import load_dotenv
+from src.const import RATE_LIMITER_ALGORITHM_ENV
 
+
+load_dotenv()
+rate_limiter_algorithm = os.getenv(RATE_LIMITER_ALGORITHM_ENV)
 
 class InMemoryTokenBucket:
     def __init__(self, bucket_size, refresh_rate):
         self.refresh_rate = refresh_rate
         self.size = bucket_size
         self.tokens = bucket_size
-        self.fill_bucket_thread()
+        
+        if rate_limiter_algorithm == "in_memory_token_bucket":
+            print("InMemoryTokenBucket. Setting the token bucket size to " + str(self.size))
+            self.fill_bucket_thread()
         
     
     user_requests_dict = {}

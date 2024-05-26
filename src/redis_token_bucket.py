@@ -23,11 +23,12 @@ class RedisTokenBucket:
         self.refresh_rate = refresh_rate
         self.size = bucket_size
         self.redis = redis.Redis(host=redis_host, port=redis_port, db=redis_db)
-        if master_node:
-            print("Master node. Setting the token bucket size to " + str(self.size))
-            self.fill_bucket_thread()
-        else:
-            print("Slave node. Not setting the token bucket size")    
+        if rate_limiter_algorithm == "redis_token_bucket":
+            if master_node:
+                print("RedisTokenBucket master node. Setting the token bucket size to " + str(self.size))
+                self.fill_bucket_thread()
+            else:
+                print("RedisTokenBucket slave node. Not setting the token bucket size")    
         
             
             

@@ -1,10 +1,12 @@
 from src.in_memory_token_bucket import InMemoryTokenBucket
 from src.redis_token_bucket import RedisTokenBucket
 from datetime import datetime, timedelta
+from src.sliding_window import SlidingWindow
 
 
 global_in_memory_bucket = InMemoryTokenBucket(15, 15);
 redis_token_bucket = RedisTokenBucket(5, 5)
+sliding_window = SlidingWindow(5, 5)
 
 class RateLimiter:
     def __init__(self, algorithm):
@@ -22,20 +24,16 @@ class RateLimiter:
     
 
     def rate_limiter(self, request):
-        if self.algorithm == "fixed_window":
-            return self.fixed_window_rate_limiter(request)
-        elif self.algorithm == "redis_token_bucket":
+        if self.algorithm == "redis_token_bucket":
             return self.redis_token_bucket_rate_limiter(request)
         elif self.algorithm == "sliding_window":
             return self.sliding_window_rate_limiter(request)
         elif self.algorithm == "in_memory_token_bucket":
             return self.token_bucket_rate_limiter(request)
 
-    def fixed_window_rate_limiter(self, request):
-        print("Fixed window rate limiter logic")
-
     def sliding_window_rate_limiter(self, request):
         print("Sliding window rate limiter logic")
+        return sliding_window.consume(self.create_unique_key(request))
 
     def token_bucket_rate_limiter(self, request):
         print("In memory token bucket rate limiter logic")        
