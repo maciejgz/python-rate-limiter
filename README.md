@@ -43,21 +43,8 @@ pip install -r requirements.txt
 
 ## Usage
 
-To run rate-limiter localy, run the following command:
-
-```bash
-$env:RATE_LIMITER_ALGORITHM="redis_token_bucket"; $env:MASTER_NODE="True"; fastapi run main.py --port 8000
-```
-$env:RATE_LIMITER_ALGORITHM="sliding_window"; $env:MASTER_NODE="True"; fastapi run main.py --port 8000
-
-Params:
-- `MASTER_NODE` - if set to `True` the instance will be responsible for refilling the tokens. Default is `False`
-- `RATE_LIMITER_ALGORITHM` - the rate limiting algorithm to use. Default is `in_memory_token_bucket`
-- `--port` - port on which the API will be available. Default is `8000`
-
-### Docker
-
-#### Run Redis
+## Pre-requisites
+###  Run Redis
 
 ```bash
 docker-compose -f docker/redis.yml up -d 
@@ -69,19 +56,37 @@ Then you can connect to Redis using the following command:
  docker exec -it python-rate-limiter-redis redis-cli
 ```
 
-#### Build the image
 
+## Run rate limiter locally
+To run rate-limiter locally, run the following command:
+
+```bash
+$env:RATE_LIMITER_ALGORITHM="redis_token_bucket"; $env:MASTER_NODE="True"; fastapi run main.py --port 8000
+```
+
+Params:
+- `MASTER_NODE` - if set to `True` the instance will be responsible for refilling the tokens. Default is `False`
+- `RATE_LIMITER_ALGORITHM` - the rate limiting algorithm to use. Default is `in_memory_token_bucket`. Allowed values are `in_memory_token_bucket`, `redis_token_bucket`, `sliding_window`
+- `--port` - port on which the API will be available. Default is `8000`
+
+## Docker
+You can build and run the rate limiter in a Docker container or deploy it to Kubernetes.
+
+### Build the image
+Build the image used to run the rate limiter:
 ```bash
 docker build -t python-rate-limiter:latest .
 ```
 
-#### Run the container
-
+### Run single container
+Run the rate limiter in a single container:
 ```bash
 docker run --network docker_python-rate-limiter-network -p 8000:8000 -e "REDIS_HOST=python-rate-limiter-redis" -e "MASTER_NODE=True" -e "RATE_LIMITER_ALGORITHM=redis_token_bucket" python-rate-limiter:latest
 ```
 
 ### Kubernetes
+Predefined Kubernetes deployment files are available in the `k8s` directory. It contains configuration with predefined algorithm and master/slave instances. 
+To deploy the rate limiter to Kubernetes, run the following command:
 ```bash
 kubectl apply -f k8s/python-rate-limiter.yml
 ```
