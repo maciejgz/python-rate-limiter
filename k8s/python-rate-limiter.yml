@@ -109,6 +109,7 @@ spec:
       port: 8000
       targetPort: 8000
 
+---
 ## rate limiter master deployment
 apiVersion: apps/v1
 kind: Deployment
