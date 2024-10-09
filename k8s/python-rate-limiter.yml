@@ -1,16 +1,3 @@
-apiVersion: v1
-kind: Service
-metadata:
-  name: python-rate-limiter-loadbalancer
-spec:
-  type: LoadBalancer
-  selector:
-    app: python-rate-limiter
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 8000
----
 ### Redis
 apiVersion: v1
 kind: Service
@@ -41,6 +28,7 @@ spec:
       containers:
         - name: redis
           image: redis:7.2.5
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 6379
           resources:
@@ -50,18 +38,22 @@ spec:
             requests:
               cpu: "0.5"
               memory: "256Mi"
+
+## rate limiter load balancer
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: python-rate-limiter-service
+  name: python-rate-limiter-loadbalancer
 spec:
+  type: LoadBalancer
   selector:
     app: python-rate-limiter
   ports:
     - protocol: TCP
-      port: 8000
+      port: 80
       targetPort: 8000
+---
 
 ## rate limiter slave
 --- 
@@ -70,14 +62,16 @@ kind: Deployment
 metadata:
   name: python-rate-limiter-deployment
 spec:
-  replicas: 0
+  replicas: 4
   selector:
     matchLabels:
       app: python-rate-limiter
+      role: slave
   template:
     metadata:
       labels:
         app: python-rate-limiter
+        role: slave
     spec:
       containers:
         - name: python-rate-limiter
@@ -89,7 +83,7 @@ spec:
             - name: MASTER_NODE
               value: "False"
             - name: RATE_LIMITER_ALGORITHM
-              value: "redis_token_bucket"
+              value: "sliding_window"
           ports:
             - containerPort: 8000
           resources:
@@ -102,31 +96,21 @@ spec:
 
 ## rate limiter master
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  name: python-rate-limiter-master-service
-spec:
-  selector:
-    app: python-rate-limiter-master
-  ports:
-    - protocol: TCP
-      port: 8000
-      targetPort: 8000
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: python-rate-limiter-master-deployment
 spec:
-  replicas: 4
+  replicas: 1
   selector:
     matchLabels:
       app: python-rate-limiter
+      role: master
   template:
     metadata:
       labels:
         app: python-rate-limiter
+        role: master
     spec:
       containers:
         - name: python-rate-limiter-master

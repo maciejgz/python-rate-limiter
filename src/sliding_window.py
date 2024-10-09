@@ -16,10 +16,10 @@ REDIS_SLIDING_WINDOW_KEY = "sliding_window_set"
 class SlidingWindow:
     
     ## window_size is the number of requests allowed in the time span
-    window_size = 0;
+    window_size = 5;
     
     ## time_span of the window is the time span in seconds
-    time_span = 0;
+    time_span = 5;
     
     def __init__(self, window_size, time_span):
         self.time_span = time_span;
