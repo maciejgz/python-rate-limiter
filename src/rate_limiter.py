@@ -1,6 +1,5 @@
 from src.in_memory_token_bucket import InMemoryTokenBucket
 from src.redis_token_bucket import RedisTokenBucket
-from datetime import datetime, timedelta
 from src.sliding_window import SlidingWindow
 
 

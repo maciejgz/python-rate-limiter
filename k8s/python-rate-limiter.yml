@@ -63,14 +63,14 @@ spec:
       port: 8000
       targetPort: 8000
 
-## rate limiter slave
+## rate limiter slave deployment
 --- 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: python-rate-limiter-deployment
 spec:
-  replicas: 0
+  replicas: 3
   selector:
     matchLabels:
       app: python-rate-limiter
@@ -100,7 +100,7 @@ spec:
               cpu: "0.5"
               memory: "256Mi"
 
-## rate limiter master
+## rate limiter master service
 ---
 apiVersion: v1
 kind: Service
@@ -113,13 +113,15 @@ spec:
     - protocol: TCP
       port: 8000
       targetPort: 8000
+
+## rate limiter master deployment
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: python-rate-limiter-master-deployment
 spec:
-  replicas: 4
+  replicas: 1
   selector:
     matchLabels:
       app: python-rate-limiter
