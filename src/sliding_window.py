@@ -15,10 +15,10 @@ REDIS_SLIDING_WINDOW_KEY = "sliding_window_set"
 
 class SlidingWindow:
     
-    ## window_size is the number of requests allowed in the time span
+    ## window_size is the number of requests allowed during the time span
     window_size = 0;
     
-    ## time_span of the window is the time span in seconds
+    ## time_span of the window in seconds
     time_span = 0;
     
     def __init__(self, window_size, time_span):
@@ -38,7 +38,7 @@ class SlidingWindow:
         self.redis.zremrangebyscore(REDIS_SLIDING_WINDOW_KEY, "-inf", current_time - self.time_span)
         
     def consume(self, user_id):
-        ## check if set is empty or numver of elements in the set is less than window size
+        ## check if set is empty or number of elements in the set is less than window size
         current_size = self.redis.zcard(REDIS_SLIDING_WINDOW_KEY)        
         if current_size is None or current_size < self.window_size:
             self.add_to_window(user_id)

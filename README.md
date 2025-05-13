@@ -65,18 +65,38 @@ Then you can connect to Redis using the following command:
 
 
 ## Run rate limiter locally
-To run rate-limiter locally, run the following command:
-
-```bash
-$env:RATE_LIMITER_ALGORITHM="sliding_window"; $env:MASTER_NODE="True"; fastapi run main.py --port 8000
-```
-
-Params:
+To run rate-limiter locally. Params:
 - `MASTER_NODE` - if set to `True` the instance will be responsible for refilling the tokens. Default is `False`. Required for `redis_token_bucket` algorithm.
 - `RATE_LIMITER_ALGORITHM` - the rate limiting algorithm to use. Default is `in_memory_token_bucket`. Allowed values are `in_memory_token_bucket`, `redis_token_bucket`, `sliding_window`
 - `--port` - port on which the API will be available. Default is `8000`
 
-## Limitations and Additional Notes
+### in_memory_token_bucket
+Single instance of token bucket. Each user can make one request per 15 seconds. Tokens are refilled every 15 seconds.
+```bash
+$env:RATE_LIMITER_ALGORITHM="in_memory_token_bucket"; $env:MASTER_NODE="True"; fastapi run main.py --port 8000
+```
+
+### redis_token_bucket
+Distributed token bucket which requires a Redis instance to be running. Each user can make one request per 15 seconds. Rate limit is set to 100 requests per 15 seconds. Only one instance of the rate limiter instance is responsible for refilling the tokens. The other instances of the rate limiter instance are responsible for consuming the tokens.
+To run the rate limiter as a master node, run the following command:
+```bash
+$env:RATE_LIMITER_ALGORITHM="redis_token_bucket"; $env:MASTER_NODE="True"; $env:REDIS_HOST="localhost"; fastapi run main.py --port 8000
+```
+
+To run the rate limiter as a slave node, run the following command:
+```bash
+$env:RATE_LIMITER_ALGORITHM="redis_token_bucket"; $env:MASTER_NODE="False"; $env:REDIS_HOST="localhost"; fastapi run main.py --port 8001
+```
+
+### sliding_window
+Distributed sliding window algorithm which requires a Redis instance to be running. Each user can make one request per 5 seconds. Rate limit is set to 5 requests per 5 seconds for all users.
+You can run mulltiple instances of the rate limiter. There is no need to set the `MASTER_NODE` environment variable. The rate limiter will automatically use the Redis instance to store the state of the sliding window.
+```bash
+$env:RATE_LIMITER_ALGORITHM="sliding_window"; $env:REDIS_HOST="localhost"; fastapi run main.py --port 8000
+```
+
+
+### Limitations and Additional Notes
 
 - The `in_memory_token_bucket` algorithm is **not distributed**. It only works within a single application instance. For distributed rate limiting, use the `redis_token_bucket`, `sliding_window` or `leaking_bucket_queue` algorithms.
 - The `redis_token_bucket` and `sliding_window` algorithm requires a Redis instance to be running. Make sure to set the `REDIS_HOST` environment variable to the hostname of the Redis instance.

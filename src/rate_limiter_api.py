@@ -13,12 +13,6 @@ rate_limiter = RateLimiter(rate_limiter_algorithm)
 @app.middleware("http")
 async def add_process_time_header(request, call_next):
 
-    ## get IP address from request
-    ip = request.client.host
-    user_agent = request.headers.get("user-agent", "")
-
-    unique_user_key = f"{ip}_{user_agent}"
-
     rate_limitng_result = rate_limiter.rate_limiter(request)
     
     if rate_limitng_result == False:
