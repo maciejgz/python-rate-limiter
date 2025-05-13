@@ -29,7 +29,7 @@ The sliding window algorithm ([source code](/src/sliding_window.py)) is a rate l
 
 #### Leaking bucket algorithm - #TODO - implement leaking bucket algorithm with some queue
 The leaking bucket algorithm is a rate limiting algorithm that is used to control the rate of traffic sent or received by a network. It is used to prevent abuse of the network and to ensure that the network is used in a fair way. The leaking bucket algorithm works by maintaining a bucket of tokens represented by the queue. Each token represents a unit of traffic that can be sent or received by the network. When a packet of traffic is sent or received by the network, a token is removed from the queue. If the queue is full, the packet is dropped or delayed until a token becomes available. The leaking bucket algorithm is a simple and efficient way to control the rate of traffic sent or received by a network. The leaking bucket algorithm is implemented in two ways:
-- in_memory_leaking_bucket - [source code](/src/in_memory_leaking_bucket.py) - single instance of leaking bucket. Each user can make one request per 15 seconds. Rate limit is set to 100 requests per 15 seconds. Tokens are refilled every 15 seconds.
+- leaking_bucket_queue - [source code](/src/leaking_bucket_queue.py) - single instance of leaking bucket. Each user can make one request per 15 seconds. Rate limit is set to 100 requests per 15 seconds. Tokens are refilled every 15 seconds.
 
 ## Configuration
 

@@ -1,6 +1,5 @@
 from src.in_memory_token_bucket import InMemoryTokenBucket
 from src.redis_token_bucket import RedisTokenBucket
-from datetime import datetime, timedelta
 from src.sliding_window import SlidingWindow
 
 
@@ -30,6 +29,8 @@ class RateLimiter:
             return self.sliding_window_rate_limiter(request)
         elif self.algorithm == "in_memory_token_bucket":
             return self.token_bucket_rate_limiter(request)
+        elif self.algorithm == "leaking_bucket_queue":
+            return self.token_bucket_rate_limiter(request)
 
     def sliding_window_rate_limiter(self, request):
         print("Sliding window rate limiter logic")
@@ -42,6 +43,9 @@ class RateLimiter:
     def redis_token_bucket_rate_limiter(self, request):
         print("Redis token bucket rate limiter logic")
         return redis_token_bucket.consume(self.create_unique_key(request), 1);
+    
+    def leaking_bucket_queue_rate_limiter(self, request):
+        print("Leaking bucket queue rate limiter logic")
         
     
     
