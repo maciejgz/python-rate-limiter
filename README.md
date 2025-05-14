@@ -63,6 +63,11 @@ Then you can connect to Redis using the following command:
  docker exec -it python-rate-limiter-redis redis-cli
 ```
 
+### Run ActiveMQ
+```bash
+docker-compose -f docker/activemq.yml up -d 
+```
+
 
 ## Run rate limiter locally
 To run rate-limiter locally. Params:
@@ -95,6 +100,12 @@ You can run mulltiple instances of the rate limiter. There is no need to set the
 $env:RATE_LIMITER_ALGORITHM="sliding_window"; $env:REDIS_HOST="localhost"; fastapi run main.py --port 8000
 ```
 
+### leaking_bucket_queue
+Distributed leaking bucket algorithm which requires a queue to be running. Each user can make one request per 15 seconds. Rate limit is set to 5 requests and one request is consumed every 5 seconds.
+```bash
+$env:RATE_LIMITER_ALGORITHM="leaking_bucket_queue"; $env:ACTIVEMQ_HOST="localhost"; fastapi run main.py --port 8000
+```
+
 
 ### Limitations and Additional Notes
 
@@ -102,7 +113,7 @@ $env:RATE_LIMITER_ALGORITHM="sliding_window"; $env:REDIS_HOST="localhost"; fasta
 - The `redis_token_bucket` and `sliding_window` algorithm requires a Redis instance to be running. Make sure to set the `REDIS_HOST` environment variable to the hostname of the Redis instance.
 - Make sure to set `MASTER_NODE=True` only for one instance when using the `redis_token_bucket` algorithm to avoid race conditions during token refilling.
 - `MASTER_NODE` is not required for `sliding_window`, `in_memory_token_bucket` and 'leaking_bucket_queue' algorithms.
-- The `leaking_bucket_queue` algorithm requires a queue to be running. Make sure to set the `QUEUE_HOST` environment variable to the hostname of the queue instance.
+- The `leaking_bucket_queue` algorithm requires a queue to be running. Make sure to set the `ACTIVEMQ_HOST` and `ACTIVEMQ_PORT` environment variables to the hostname of the queue instance.
 
 ## Docker
 You can build and run the rate limiter in a Docker container or deploy it to Kubernetes.

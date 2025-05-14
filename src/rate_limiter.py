@@ -1,4 +1,5 @@
 from src.in_memory_token_bucket import InMemoryTokenBucket
+from src.leaking_bucket_queue import LeakingBucketQueue
 from src.redis_token_bucket import RedisTokenBucket
 from src.sliding_window import SlidingWindow
 
@@ -6,6 +7,7 @@ from src.sliding_window import SlidingWindow
 global_in_memory_bucket = InMemoryTokenBucket(15, 15);
 redis_token_bucket = RedisTokenBucket(5, 5)
 sliding_window = SlidingWindow(5, 5)
+leaking_bucket_queue = LeakingBucketQueue()
 
 class RateLimiter:
     def __init__(self, algorithm):
@@ -30,7 +32,7 @@ class RateLimiter:
         elif self.algorithm == "in_memory_token_bucket":
             return self.token_bucket_rate_limiter(request)
         elif self.algorithm == "leaking_bucket_queue":
-            return self.token_bucket_rate_limiter(request)
+            return self.leaking_bucket_queue_rate_limiter(request)
 
     def sliding_window_rate_limiter(self, request):
         print("Sliding window rate limiter logic")
@@ -46,6 +48,7 @@ class RateLimiter:
     
     def leaking_bucket_queue_rate_limiter(self, request):
         print("Leaking bucket queue rate limiter logic")
+        return leaking_bucket_queue.consume(self.create_unique_key(request), 1);
         
     
     
